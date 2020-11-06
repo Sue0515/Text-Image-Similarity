@@ -1,6 +1,8 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
+import numpy as np
+import pdb
 
 # NN for Image modality
 class IMG_NN(nn.Module):
@@ -39,7 +41,7 @@ class CC_NN(nn.Module):
     #     predict1 = self.linearLayer2(feature1)
     #     predict2 = self.linearLayer2(feature2)
     #     return feature1, feature2, predict1, predict2
-     def __init__(self, img_enc_size, sent_enc_size, img_layer_sizes=[250, 200], \
+    def __init__(self, img_enc_size, sent_enc_size, img_layer_sizes=[250, 200], \
         sent_layer_sizes=[2000, 500, 200], dropout=0.2):
 
         super().__init__()
@@ -59,16 +61,15 @@ class CC_NN(nn.Module):
             self.sent_MLP.add_module(name="D%i"%(i), module=nn.Dropout(dropout)) # added
             self.sent_MLP.add_module(name="A%i"%(i), module=nn.Tanh())
         
-    # (neg_)img: bs x id, sent: bs x sd
     def forward(self, img, sent, neg_img=None):
-        img_feat = self.img_MLP(img) # bs x dim
-        sent_feat = self.sent_MLP(sent) # bs x dim
-        dots = (img_feat * sent_feat).sum(dim=1) # bs
-        probs = self.prob(dots) # bs
+        img_feat = self.img_MLP(img)
+        sent_feat = self.sent_MLP(sent)
+        dots = (img_feat * sent_feat).sum(dim=1) 
+        probs = self.prob(dots) 
         if neg_img is not None:
             neg_img_feat = self.img_MLP(neg_img)
-            neg_dots = (neg_img_feat * sent_feat).sum(dim=1) # bs
-            neg_probs = self.prob(neg_dots) # bs
+            neg_dots = (neg_img_feat * sent_feat).sum(dim=1)
+            neg_probs = self.prob(neg_dots) 
         else:
             neg_probs = torch.zeros(probs.shape)
 
