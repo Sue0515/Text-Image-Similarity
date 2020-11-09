@@ -78,5 +78,5 @@ Please ensure your pull request adheres to the following guidelines:
 - Make sure your text editor is set to remove trailing whitespace.
 
 # Authors  
-  * **Su In Cho, SBU ID: 111669000,**  *Lead Programmer*
-  * **Jinwoo Choi, SBU ID: 110096881,**  *Project Manager*
+  * **Su In Cho**  
+  * **Jinwoo Choi**  
