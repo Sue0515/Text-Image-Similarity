@@ -13,12 +13,12 @@ def train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss
     for epoch in range(num_epochs):
         #tracker_epoch = defaultdict(lambda: defaultdict(dict))
         for split, dataset in datasets.items():
-            data_loader = DataLoader(dataset=dataset, batch_size=batch, shuffle=True)
+            data_loader = DataLoader(dataset=dataset, num_workers=8, batch_size=batch, shuffle=True, pin_memory = True)
             for iteration, dat in enumerate(data_loader):
                 with torch.no_grad():
                     img = resnet(torch.tensor(dat[0]).cuda()).view(batch, -1) # bs x args.inp_size
                     img = img.repeat(1, cap_per_img).view(-1, 512) # replicate image features for each caption 
-                    neg_img = torch.cat((img[cap_per_img:], img[:cap_per_img]), dim=0) # permute the images to create a mismatch
+                    neg_img = torch.cat((img[cap_per_img:], img[:cap_per_img]), dim=0).cuda() # permute the images to create a mismatch
                     raw_captions = list(zip(*dat[1])) # list of captions, each grouped by image
                     cap = []
                     for x in raw_captions:

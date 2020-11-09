@@ -22,17 +22,17 @@ class Embed(nn.Module):
 def init_sentemb():
     params = {'bsize': 16, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
                     'pool_type': 'max', 'dpout_model': 0.0, 'version': 1}
-    model = InferSent(params)
+    model = InferSent(params).cuda()
     model.load_state_dict(torch.load('../milestone2/ProfessorCode/sent_emb/encoder/infersent2.pkl'))
-    model = model.cuda()
+    model = model.cuda() # gpu
     model.set_w2v_path('../milestone2/ProfessorCode/sent_emb/fastText/crawl-300d-2M.vec')
     model.build_vocab_k_words(K=100000)
     for p in model.parameters(): p.requires_grad = False
     return model
 
 def load_resnet():
-    model = models.resnet34(pretrained=True) # 34: 512, rest: 2048
+    model = models.resnet34(pretrained=True).cuda() # 34: 512, rest: 2048
     modules = list(model.children())[:-1]
-    model = nn.Sequential(*modules).cuda()
+    model = nn.Sequential(*modules).cuda() # gpu
     for p in model.parameters(): p.requires_grad = False
     return model # output size: bs x 512

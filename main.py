@@ -19,6 +19,7 @@ from torchvision import models
 def main(args):
     ts = time.time()
     datasets = OrderedDict()
+    print(torch.cuda.current_device())
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     MAX_EPOCH = 100
     common_trans = transforms.Compose([
@@ -30,6 +31,8 @@ def main(args):
         annFile='../annotations/captions_train2014.json', transform=common_trans)
     datasets['val'] = CocoCaptions(root='../val2014', 
         annFile='../annotations/captions_val2014.json', transform=common_trans)
+    # datasets['test'] = CocoCaptions(root='../test2014', 
+    #     annFile='../annotations/captions_test2014.json', transform=common_trans)
 
     print('Loading sentence encoder...')
     stcencoder = init_sentemb()
@@ -41,12 +44,15 @@ def main(args):
     stc_size = 4096
 
     model = CC_NN(img_size, stc_size)
-    model.train()
+    model.train() # set to training mode 
     model.cuda()    # use gpu
+    #model.to(device)
+    next(model.parameters()).is_cuda
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate) # 최적화 알고리즘 
-    model_loss = nn.BCELoss() ### binary cross entropy - measuring the error of a reconstruction in for example an auto-encoder.
+    model_loss = nn.MSELoss() ### binary cross entropy - measuring the error of a reconstruction in for example an auto-encoder.
     batch = args.batch_size
+    #batch = 32
     save_path = './models/' + time.strftime('%Y%m%d%H%M') + '-model.pth'
     min_loss = np.Inf
     cap_per_img = 5 # number of captions per image in MSCOCO set
@@ -55,7 +61,7 @@ def main(args):
 
     # train model 
     print('Start training...')
-    model = train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, MAX_EPOCH).to(device)
+    model = train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, MAX_EPOCH)
     print('Finished training...')
 
     # for epoch in range(args.epochs):
