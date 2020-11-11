@@ -19,7 +19,7 @@ class Embed(nn.Module):
     def __init__(self):
         super(Embed, self).__init__()
         
-def init_sentemb():
+def load_sentemb():
     params = {'bsize': 16, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
                     'pool_type': 'max', 'dpout_model': 0.0, 'version': 1}
     model = InferSent(params).cuda()
