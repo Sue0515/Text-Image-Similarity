@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import models
@@ -29,24 +30,23 @@ class CC_NN(nn.Module):
     def __init__(self, img_enc_size, sent_enc_size, img_layer_sizes=[250, 200], \
         sent_layer_sizes=[2000, 500, 200], dropout=0.2):
         super().__init__()
-        embedding_dim = 100
         img_layer_sizes = [img_enc_size] + img_layer_sizes
         sent_layer_sizes = [sent_enc_size] + sent_layer_sizes
         self.img_LSTM = nn.Sequential()
         self.sent_LSTM = nn.Sequential()
-        self.prob = nn.Sigmoid() 
+        self.prob = nn.Sigmoid()    # output layer 
         #self.prob = nn.Softmax() 
 
         for i, (in_size, out_size) in enumerate( zip(img_layer_sizes[:-1], img_layer_sizes[1:]) ):
             self.img_LSTM.add_module(name="Linear %i"%(i), module=nn.Linear(in_size, out_size))
-            self.img_LSTM.add_module(name="Relu %i"%(i), module=nn.ReLU(inplace=False))
+            #self.img_LSTM.add_module(name="Activation %i"%(i), module=nn.ReLU(inplace=False))
             self.img_LSTM.add_module(name="Dropout %i"%(i), module=nn.Dropout(dropout)) # added
             self.img_LSTM.add_module(name="Activation %i"%(i), module=nn.Tanh())
 
 
         for i, (in_size, out_size) in enumerate( zip(sent_layer_sizes[:-1], sent_layer_sizes[1:]) ):
             self.sent_LSTM.add_module(name="Linear %i"%(i), module=nn.Linear(in_size, out_size))
-            self.sent_LSTM.add_module(name="Relu %i"%(i), module=nn.ReLU(inplace=False))
+            #self.sent_LSTM.add_module(name="Activation %i"%(i), module=nn.ReLU(inplace=False))
             self.sent_LSTM.add_module(name="Dropout %i"%(i), module=nn.Dropout(dropout)) # added
             self.sent_LSTM.add_module(name="Activation %i"%(i), module=nn.Tanh())
 
@@ -54,12 +54,18 @@ class CC_NN(nn.Module):
     def forward(self, img, sent, neg_img=None):
         img_feat = self.img_LSTM(img)
         sent_feat = self.sent_LSTM(sent)
-        dots = (img_feat * sent_feat).sum(dim=1)    # compute dot product of the img_feat and sent_feat 
-        # dots = ((img_feat - sent_feat).abs()).sum(dim=1)    #compute L1 distance 
-        # dots = ((img_feat - sent_feat)**2).sum(dim=1)**.5   # compute L2 distance 
-        # dots = ((img_feat - sent_feat).abs()).max()     # compute infinity norm 
-        # dots = (img_feat * sent_feat).sum(dim=1) / ((img_feat**2).sum(dim=1)**.5 * (sent_feat**2).sum(dim=1)**.5)   # compute cosine similarity of the two vectors 
-        # dots = torch.stack([img_feat, sent_feat]).min(dim=0)[0].sum(dim=1) / torch.stack([img_feat, sent_feat]).max(dim=0)[0].sum(dim=1)
+        # # compute dot product of the img_feat and sent_feat 
+        # dots = (img_feat * sent_feat).sum(dim=1)    
+        # # compute L1 distance 
+        # dots = ((img_feat - sent_feat).abs()).sum(dim=1)    
+        # # compute L2 distance 
+        # dots = ((img_feat - sent_feat)**2).sum(dim=1)**.5   
+        # # compute infinity norm 
+        # dots = ((img_feat - sent_feat).abs()).max(dim=0)     
+        # # compute cosine similarity of the two vectors 
+        # dots = (img_feat * sent_feat).sum(dim=1) / ((img_feat**2).sum(dim=1)**.5 * (sent_feat**2).sum(dim=1)**.5)   
+        # compute cosine similarity of the two vectors 
+        dots = torch.stack([img_feat, sent_feat]).min(dim=0)[0].sum(dim=1) / torch.stack([img_feat, sent_feat]).max(dim=0)[0].sum(dim=1) 
         
         probs = self.prob(dots) 
         if neg_img is not None:
