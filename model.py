@@ -64,13 +64,14 @@ class CC_NN(nn.Module):
         # dots = ((img_feat - sent_feat).abs()).max(dim=0)     
         # # compute cosine similarity of the two vectors 
         # dots = (img_feat * sent_feat).sum(dim=1) / ((img_feat**2).sum(dim=1)**.5 * (sent_feat**2).sum(dim=1)**.5)   
-        # compute cosine similarity of the two vectors 
+        # compute jaccard similarity of the two vectors 
         dots = torch.stack([img_feat, sent_feat]).min(dim=0)[0].sum(dim=1) / torch.stack([img_feat, sent_feat]).max(dim=0)[0].sum(dim=1) 
         
         probs = self.prob(dots) 
         if neg_img is not None:
             neg_img_feat = self.img_LSTM(neg_img)
             neg_dots = (neg_img_feat * sent_feat).sum(dim=1) # Compute dot product for similarity 
+            neg_dots = torch.stack([neg_img_feat, sent_feat]).min(dim=0)[0].sum(dim=1) / torch.stack([neg_img_feat, sent_feat]).max(dim=0)[0].sum(dim=1) 
             neg_probs = self.prob(neg_dots) 
         else:
             neg_probs = torch.zeros(probs.shape).cuda()
