@@ -39,14 +39,14 @@ class CC_NN(nn.Module):
 
         for i, (in_size, out_size) in enumerate( zip(img_layer_sizes[:-1], img_layer_sizes[1:]) ):
             self.img_LSTM.add_module(name="Linear %i"%(i), module=nn.Linear(in_size, out_size))
-            self.img_LSTM.add_module(name="Relu %i"%(i), module=nn.ReLU())
+            self.img_LSTM.add_module(name="Relu %i"%(i), module=nn.ReLU(inplace=False))
             self.img_LSTM.add_module(name="Dropout %i"%(i), module=nn.Dropout(dropout)) # added
             self.img_LSTM.add_module(name="Activation %i"%(i), module=nn.Tanh())
 
 
         for i, (in_size, out_size) in enumerate( zip(sent_layer_sizes[:-1], sent_layer_sizes[1:]) ):
             self.sent_LSTM.add_module(name="Linear %i"%(i), module=nn.Linear(in_size, out_size))
-            self.sent_LSTM.add_module(name="Relu %i"%(i), module=nn.ReLU())
+            self.sent_LSTM.add_module(name="Relu %i"%(i), module=nn.ReLU(inplace=False))
             self.sent_LSTM.add_module(name="Dropout %i"%(i), module=nn.Dropout(dropout)) # added
             self.sent_LSTM.add_module(name="Activation %i"%(i), module=nn.Tanh())
 
