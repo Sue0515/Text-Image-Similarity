@@ -1,5 +1,3 @@
-![logo](./ml.jpeg)
-
 # Introduction
 
 
