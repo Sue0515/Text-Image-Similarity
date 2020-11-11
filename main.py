@@ -50,7 +50,8 @@ def main(args):
     next(model.parameters()).is_cuda
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate) # 최적화 알고리즘 
-    model_loss = nn.MSELoss() ### binary cross entropy - measuring the error of a reconstruction in for example an auto-encoder.
+    model_loss = nn.BCELoss() ### binary cross entropy - measuring the error of a reconstruction in for example an auto-encoder.
+    model_loss2 = nn.MSELoss()
     batch = args.batch_size
     #batch = 32
     save_path = './models/' + time.strftime('%Y%m%d%H%M') + '-model.pth'
