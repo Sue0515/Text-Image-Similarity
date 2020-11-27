@@ -23,9 +23,9 @@ def load_sentemb():
     params = {'bsize': 16, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
                     'pool_type': 'max', 'dpout_model': 0.0, 'version': 1}
     model = InferSent(params).cuda()
-    model.load_state_dict(torch.load('../milestone2/ProfessorCode/sent_emb/encoder/infersent2.pkl'))
+    model.load_state_dict(torch.load('../encoder/infersent2.pkl'))
     model = model.cuda() # gpu
-    model.set_w2v_path('../milestone2/ProfessorCode/sent_emb/fastText/crawl-300d-2M.vec')
+    model.set_w2v_path('../fastText/crawl-300d-2M.vec/crawl-300d-2M.vec')
     model.build_vocab_k_words(K=100000)
     for p in model.parameters(): p.requires_grad = False
     return model
