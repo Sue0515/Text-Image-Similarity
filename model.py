@@ -55,7 +55,7 @@ class CC_NN(nn.Module):
         img_feat = self.img_LSTM(img)
         sent_feat = self.sent_LSTM(sent)
         # # compute dot product of the img_feat and sent_feat 
-        # dots = (img_feat * sent_feat).sum(dim=1)    
+        dots = (img_feat * sent_feat).sum(dim=1)    
         # # compute L1 distance 
         # dots = ((img_feat - sent_feat).abs()).sum(dim=1)    
         # # compute L2 distance 
@@ -65,7 +65,7 @@ class CC_NN(nn.Module):
         # # compute cosine similarity of the two vectors 
         # dots = (img_feat * sent_feat).sum(dim=1) / ((img_feat**2).sum(dim=1)**.5 * (sent_feat**2).sum(dim=1)**.5)   
         # compute cosine similarity of the two vectors 
-        dots = torch.stack([img_feat, sent_feat]).min(dim=0)[0].sum(dim=1) / torch.stack([img_feat, sent_feat]).max(dim=0)[0].sum(dim=1) 
+        # dots = torch.stack([img_feat, sent_feat]).min(dim=0)[0].sum(dim=1) / torch.stack([img_feat, sent_feat]).max(dim=0)[0].sum(dim=1) 
         
         probs = self.prob(dots) 
         if neg_img is not None:

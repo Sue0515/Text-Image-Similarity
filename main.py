@@ -22,6 +22,7 @@ def main(args):
     print(torch.cuda.current_device())
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     MAX_EPOCH = 100
+    k = 5
     common_trans = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
@@ -51,7 +52,7 @@ def main(args):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate) # 최적화 알고리즘 
     model_loss = nn.BCELoss() ### binary cross entropy - measuring the error of a reconstruction in for example an auto-encoder.
-    model_loss2 = nn.MSELoss()
+    #model_loss2 = nn.MSELoss()
     batch = args.batch_size
     #batch = 32
     save_path = './models/' + time.strftime('%Y%m%d%H%M') + '-model.pth'
@@ -62,7 +63,7 @@ def main(args):
 
     # train model 
     print('Start training...')
-    model = train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, MAX_EPOCH)
+    model = train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, MAX_EPOCH, k)
     print('Finished training...')
 
 if __name__ == '__main__':

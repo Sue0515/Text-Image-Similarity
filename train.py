@@ -7,14 +7,57 @@ import time
 import copy
 import torch.nn.functional as F
 import numpy as np
-from torch.utils.data import DataLoader
+#from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import KFold
+#import pandas as pd
+from torch.utils.data import DataLoader, SubsetRandomSampler
 
-def train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, device="gpu", num_epochs=100):
+def train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, k, device="gpu", num_epochs=100):
+    # train_score = pd.Series()
+    # val_score = pd.Series()
+    # total_size = len(datasets)
+    # fraction = 1/k
+    # seg = int(total_size * fraction)
+    # for i in range(k):
+    #     trll = 0
+    #     trlr= i * seg
+    #     vall = trlr
+    #     valr = i * seg + seg
+    #     trrl = valr
+    #     trrr = total_size
+
+    #     print("train indices: [%d, %d), [%d, %d), test indices: [%d, %d)" % (trll, trlr, trrl, trrr, vall, valr)) 
+
+    #     train_left_indices = list(range(trll, trlr))
+    #     train_right_indices = list(range(trrl, trrr))
+
+    #     train_indices = train_left_indices + train_right_indices 
+    #     val_indices = list(range(vall, valr))
+
+    #     train_set = torch.utils.data.dataset.Subset(datasets, train_indices)
+    #     val_set = torch.utils.data.dataset.Subset(datasets, val_indices)
+
+    #     train_loader = DataLoader(train_set, batch_size = 50, shuffle = True, num_workers = 4)
+    #     val_loader = DataLoader(val_set, batch_size = 50, shuffle = True, num_workers = 4)
+    ########################################################################################################
+    # prepare cross validation 
+    # kfold = StratifiedKFold(n_splits = k, shuffle= True, random_state = 0)
+    kfold = KFold(n_splits = 2, shuffle = True, random_state = 42)
+
+    # enumerate the splits 
+    # for fold, (train, valid) in enumerate(kfold.split(datasets)):
+    #     print('Fold : {}'.format(fold))
+    #     train_sampler = SubsetRandomSampler(train)
+    #     valid_sampler = SubsetRandomSampler(valid)
+        #train_loader = DataLoader(dataset = datasets['train'], batch_size = batch, sampler = train_sampler)
+        #valid_loader = DataLoader(dataset = datasets['val'], batch_size = batch, sampler = valid_sampler)
+
     for epoch in range(num_epochs):
         #tracker_epoch = defaultdict(lambda: defaultdict(dict))
         for split, dataset in datasets.items():
             data_loader = DataLoader(dataset=dataset, num_workers=8, batch_size=batch, shuffle=True, pin_memory = True)
             for iteration, dat in enumerate(data_loader):
+            #for iteration, dat in enumerate(train_loader):
                 with torch.no_grad():
                     img = resnet(torch.tensor(dat[0]).cuda()).view(batch, -1) # bs x args.inp_size
                     img = img.repeat(1, cap_per_img).view(-1, 512) # replicate image features for each caption 
@@ -35,6 +78,7 @@ def train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss
                 if iteration % args.print_every == 0 or iteration == len(data_loader)-1:
                     _loss = loss.item()
                     print("Epoch %d, Batch %04d/%i, Loss %9.4f"%(epoch, iteration, len(data_loader)-1, _loss))
+                    #print("Epoch %d, Batch %04d/%i, Loss %9.4f"%(epoch, iteration, len(train_loader)-1, _loss))
                     if _loss < min_loss:
                         min_loss = _loss
                         print("Saving model to " + save_path)
