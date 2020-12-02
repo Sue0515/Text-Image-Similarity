@@ -19,21 +19,20 @@ from torchvision import models
 def main(args):
     ts = time.time()
     datasets = OrderedDict()
-    print(torch.cuda.current_device())
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     MAX_EPOCH = 100
     k = 5
     common_trans = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # normalization 
     ])
     datasets['train'] = CocoCaptions(root='../train2014', 
         annFile='../annotations/captions_train2014.json', transform=common_trans)
-    datasets['val'] = CocoCaptions(root='../val2014', 
+    datasets['val'] = CocoCaptions(root='../val2014/val2014', 
         annFile='../annotations/captions_val2014.json', transform=common_trans)
-    # datasets['test'] = CocoCaptions(root='../test2014', 
-    #     annFile='../annotations/captions_test2014.json', transform=common_trans)
+    #datasets['test'] = CocoCaptions(root='../test2014', 
+     #    annFile='../annotations/captions_test2014.json', transform=common_trans)
 
     print('Loading sentence encoder...')
     stcencoder = load_sentemb()
