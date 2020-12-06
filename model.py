@@ -38,6 +38,7 @@ class CC_NN(nn.Module):
         #self.prob = nn.Softmax() 
 
         for i, (in_size, out_size) in enumerate( zip(img_layer_sizes[:-1], img_layer_sizes[1:]) ):
+            self.img_LSTM.add_module(name="Linear %i"%(i), module=nn.LeakyReLU(in_size, out_size))
             self.img_LSTM.add_module(name="Linear %i"%(i), module=nn.Linear(in_size, out_size))
             #self.img_LSTM.add_module(name="Activation %i"%(i), module=nn.ReLU(inplace=False))
             self.img_LSTM.add_module(name="Dropout %i"%(i), module=nn.Dropout(dropout)) # added
@@ -45,6 +46,7 @@ class CC_NN(nn.Module):
 
 
         for i, (in_size, out_size) in enumerate( zip(sent_layer_sizes[:-1], sent_layer_sizes[1:]) ):
+            self.sent_LSTM.add_module(name="Linear %i"%(i), module=nn.LeakyReLU(inplace=True))
             self.sent_LSTM.add_module(name="Linear %i"%(i), module=nn.Linear(in_size, out_size))
             #self.sent_LSTM.add_module(name="Activation %i"%(i), module=nn.ReLU(inplace=False))
             self.sent_LSTM.add_module(name="Dropout %i"%(i), module=nn.Dropout(dropout)) # added
@@ -70,6 +72,7 @@ class CC_NN(nn.Module):
         probs = self.prob(dots) 
         if neg_img is not None:
             neg_img_feat = self.img_LSTM(neg_img)
+            ###NEEDTO DO SOMETHING HERE FOR PENALIZING 
             neg_dots = (neg_img_feat * sent_feat).sum(dim=1) # Compute dot product for similarity 
             neg_probs = self.prob(neg_dots) 
         else:
