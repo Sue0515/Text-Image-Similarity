@@ -14,15 +14,17 @@ from torchvision.datasets import CocoCaptions #MNIST
 from torch.utils.data import DataLoader
 from torchvision import models
 from InferSent.models import InferSent
+#from InferSent.models import BGRUlastEncoder
 
 class Embed(nn.Module):
     def __init__(self):
-        super(Embed, self).__init__()
+        super(Embed, self).__init__()                       
         
 def load_sentemb():
     params = {'bsize': 16, 'word_emb_dim': 300, 'enc_lstm_dim': 2048,
                     'pool_type': 'max', 'dpout_model': 0.0, 'version': 1}
     model = InferSent(params).cuda()
+    #model = BGRUlastEncoder(params).cuda()
     model.load_state_dict(torch.load('../encoder/infersent2.pkl'))
     model = model.cuda() # gpu
     model.set_w2v_path('../fastText/crawl-300d-2M.vec/crawl-300d-2M.vec')

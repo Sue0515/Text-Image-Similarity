@@ -19,6 +19,7 @@ from torchvision import models
 def main(args):
     ts = time.time()
     datasets = OrderedDict()
+    neg_datasets = OrderedDict()
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     MAX_EPOCH = 100
     k = 5
@@ -31,9 +32,12 @@ def main(args):
         annFile='../annotations/captions_train2014.json', transform=common_trans)
     datasets['val'] = CocoCaptions(root='../val2014/val2014', 
         annFile='../annotations/captions_val2014.json', transform=common_trans)
-    #datasets['test'] = CocoCaptions(root='../test2014', 
-     #    annFile='../annotations/captions_test2014.json', transform=common_trans)
-
+    neg_datasets['test'] = CocoCaptions(root='../neg2014/neg014/neg2014', annFile='../annotations/captions_val2014.json',
+       transform=common_trans)
+    # neg_datasets['train'] = CocoCaptions(root='../train2014', 
+    #     annFile='../annotations/captions_train2014.json', transform=common_trans)
+    # neg_datasets['val'] = CocoCaptions(root='../val2014/val2014', 
+    #     annFile='../annotations/captions_val2014.json', transform=common_trans)
     print('Loading sentence encoder...')
     stcencoder = load_sentemb()
 
@@ -62,7 +66,7 @@ def main(args):
 
     # train model 
     print('Start training...')
-    model = train_model(args, datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, MAX_EPOCH, k)
+    model = train_model(args, datasets, neg_datasets, stcencoder, resnet, model, optimizer, model_loss, batch, save_path, min_loss, cap_per_img, target, MAX_EPOCH, k)
     print('Finished training...')
 
 if __name__ == '__main__':

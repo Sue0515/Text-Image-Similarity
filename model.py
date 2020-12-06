@@ -72,6 +72,7 @@ class CC_NN(nn.Module):
         probs = self.prob(dots) 
         if neg_img is not None:
             neg_img_feat = self.img_LSTM(neg_img)
+            ###NEEDTO DO SOMETHING HERE FOR PENALIZING 
             neg_dots = (neg_img_feat * sent_feat).sum(dim=1) # Compute dot product for similarity 
             neg_probs = self.prob(neg_dots) 
         else:
